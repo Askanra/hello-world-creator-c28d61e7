@@ -62,8 +62,11 @@ export const Navbar = () => {
             <Button variant="ghost" size="sm" asChild>
               <Link to="/login">Login</Link>
             </Button>
+            <Button variant="outline" size="sm" asChild>
+              <Link to="/demo">Live Demo</Link>
+            </Button>
             <Button variant="hero" size="sm" asChild>
-              <Link to="/dashboard">Live Demo</Link>
+              <Link to="/pricing">Get Started</Link>
             </Button>
           </div>
 
@@ -84,9 +87,10 @@ export const Navbar = () => {
                 {l.label}
               </Link>
             ))}
-            <Button variant="hero" className="mt-2" asChild>
-              <Link to="/pricing" onClick={() => setOpen(false)}>Get Started</Link>
-            </Button>
+            <div className="grid grid-cols-2 gap-2 mt-2">
+              <Button variant="outline" asChild><Link to="/login" onClick={() => setOpen(false)}>Login</Link></Button>
+              <Button variant="hero" asChild><Link to="/demo" onClick={() => setOpen(false)}>Live Demo</Link></Button>
+            </div>
           </div>
         )}
       </div>

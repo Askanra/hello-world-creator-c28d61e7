@@ -1,25 +1,60 @@
-import { Activity, Users, Ban, Server, TrendingUp, AlertCircle } from "lucide-react";
-import { KPI, SERVER, TRAFFIC, DETECTION_BREAKDOWN, LOGS } from "@/lib/demoData";
+import { Activity, Users, Ban, Server, TrendingUp, AlertCircle, Globe, ChevronRight } from "lucide-react";
+import { KPI, TRAFFIC, TRAFFIC_7D, TRAFFIC_30D, DETECTION_BREAKDOWN, LOGS } from "@/lib/demoData";
 import { Line, ResponsiveContainer, XAxis, YAxis, Tooltip, Area, AreaChart, PieChart, Pie, Cell } from "recharts";
+import { useState } from "react";
+import { useServer, useServerBase } from "@/hooks/useServer";
+import { Link, useNavigate } from "react-router-dom";
+
+const RANGES = ["Today", "7 days", "30 days"] as const;
 
 const Overview = () => {
+  const server = useServer();
+  const base = useServerBase();
+  const nav = useNavigate();
+  const [range, setRange] = useState<(typeof RANGES)[number]>("Today");
+
+  const data = range === "Today" ? TRAFFIC : range === "7 days" ? TRAFFIC_7D : TRAFFIC_30D;
+
   const kpis = [
     { label: "Connections", value: KPI.connections24h.toLocaleString(), icon: Activity, color: "text-cyan-400", bg: "bg-cyan-500/10", border: "border-cyan-500/20" },
     { label: "Total Players", value: KPI.totalPlayers.toLocaleString(), icon: Users, color: "text-purple-400", bg: "bg-purple-500/10", border: "border-purple-500/20" },
     { label: "Total Bans", value: KPI.totalBans.toString(), icon: Ban, color: "text-red-400", bg: "bg-red-500/10", border: "border-red-500/20" },
-    { label: "Online Now", value: `${SERVER.online}/${SERVER.slots}`, icon: Server, color: "text-emerald-400", bg: "bg-emerald-500/10", border: "border-emerald-500/20" },
+    { label: "Online Now", value: `${server.online}/${server.slots}`, icon: Server, color: "text-emerald-400", bg: "bg-emerald-500/10", border: "border-emerald-500/20" },
   ];
 
   return (
     <div className="space-y-6 animate-fade-up">
-      <div className="flex items-center justify-between flex-wrap gap-4">
-        <div>
-          <h1 className="font-display text-3xl font-bold tracking-tighter">Server Overview</h1>
-          <p className="text-sm text-muted-foreground mt-1">Live data from {SERVER.name} · Region {SERVER.region} · {SERVER.framework}</p>
+      {/* Server banner */}
+      <div className="relative rounded-2xl overflow-hidden border border-border/50 h-44 md:h-52">
+        <img src={server.banner} alt={server.name} className="absolute inset-0 w-full h-full object-cover" loading="lazy" />
+        <div className="absolute inset-0 bg-gradient-to-r from-background via-background/80 to-background/20" />
+        <div className="relative h-full flex items-end p-5 md:p-6">
+          <div className="flex items-end justify-between w-full flex-wrap gap-3">
+            <div>
+              <div className="flex items-center gap-2 mb-2">
+                <span className={`px-2 py-0.5 rounded text-[10px] font-mono border ${server.status === "online" ? "bg-emerald-500/20 text-emerald-400 border-emerald-500/30" : server.status === "maintenance" ? "bg-amber-500/20 text-amber-400 border-amber-500/30" : "bg-muted text-muted-foreground border-border"}`}>
+                  {server.status.toUpperCase()}
+                </span>
+                <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-primary/15 text-primary border border-primary/30">{server.license}</span>
+                <span className="text-[10px] font-mono text-muted-foreground">{server.region} · {server.framework}</span>
+              </div>
+              <h1 className="font-display text-3xl md:text-4xl font-bold tracking-tighter">{server.name}</h1>
+              <div className="flex items-center gap-1.5 text-xs font-mono text-muted-foreground mt-1">
+                <Globe className="h-3 w-3" /> {server.ip}
+              </div>
+            </div>
+            <button onClick={() => navigator.clipboard.writeText(server.ip)} className="text-xs font-mono px-3 py-2 rounded-md bg-primary/10 hover:bg-primary/20 text-primary border border-primary/30 transition">
+              Copy connect IP
+            </button>
+          </div>
         </div>
+      </div>
+
+      <div className="flex items-center justify-between flex-wrap gap-4">
+        <p className="text-sm text-muted-foreground">Live data · uptime {server.uptime}</p>
         <div className="flex gap-1.5 text-xs font-mono">
-          {["Today", "7 days", "30 days"].map((p, i) => (
-            <button key={p} className={`px-3 py-1.5 rounded-md ${i === 0 ? "bg-primary/15 text-primary border border-primary/30" : "text-muted-foreground hover:bg-muted/40"}`}>{p}</button>
+          {RANGES.map((p) => (
+            <button key={p} onClick={() => setRange(p)} className={`px-3 py-1.5 rounded-md transition ${range === p ? "bg-primary/15 text-primary border border-primary/30" : "text-muted-foreground hover:bg-muted/40"}`}>{p}</button>
           ))}
         </div>
       </div>
@@ -46,7 +81,7 @@ const Overview = () => {
           <div className="flex items-center justify-between mb-4">
             <div>
               <h3 className="font-semibold">Server Analytics</h3>
-              <p className="text-xs text-muted-foreground">last 24h player & ban activity</p>
+              <p className="text-xs text-muted-foreground">{range} player & ban activity</p>
             </div>
             <div className="flex gap-4 text-xs">
               <div><span className="text-muted-foreground">Peak </span><span className="font-bold">{KPI.peakPlayers}</span></div>
@@ -54,7 +89,7 @@ const Overview = () => {
             </div>
           </div>
           <ResponsiveContainer width="100%" height={260}>
-            <AreaChart data={TRAFFIC}>
+            <AreaChart data={data}>
               <defs>
                 <linearGradient id="players" x1="0" y1="0" x2="0" y2="1">
                   <stop offset="0%" stopColor="hsl(195 100% 55%)" stopOpacity={0.5} />
@@ -91,25 +126,31 @@ const Overview = () => {
         </div>
       </div>
 
-      {/* Live feed */}
+      {/* Live feed → clickable to logs */}
       <div className="glass rounded-xl p-5">
         <div className="flex items-center justify-between mb-4">
           <div>
             <h3 className="font-semibold flex items-center gap-2"><AlertCircle className="h-4 w-4 text-primary" /> Live Event Stream</h3>
-            <p className="text-xs text-muted-foreground">Real-time detections and player actions</p>
+            <p className="text-xs text-muted-foreground">Real-time detections and player actions · click any row for full logs</p>
           </div>
-          <div className="flex items-center gap-1.5 text-xs font-mono text-emerald-400">
-            <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse" /> LIVE
-          </div>
+          <Link to={`${base}/logs`} className="text-xs font-mono text-primary hover:underline flex items-center gap-1">
+            View all <ChevronRight className="h-3 w-3" />
+          </Link>
         </div>
         <div className="space-y-1.5 max-h-72 overflow-y-auto">
           {LOGS.slice(0, 12).map((l, i) => (
-            <div key={i} className="flex items-center gap-3 py-2 px-3 rounded-lg hover:bg-muted/30 text-xs animate-fade-up" style={{ animationDelay: `${i * 30}ms` }}>
+            <button
+              key={l.id}
+              onClick={() => nav(`${base}/logs?event=${l.id}`)}
+              className="w-full text-left flex items-center gap-3 py-2 px-3 rounded-lg hover:bg-muted/30 text-xs animate-fade-up transition"
+              style={{ animationDelay: `${i * 30}ms` }}
+            >
               <span className="font-mono text-muted-foreground w-16">{l.time}</span>
               <span className={`px-2 py-0.5 rounded text-[10px] font-mono font-bold border ${l.color}`}>{l.type}</span>
               <span className="font-medium">{l.player}</span>
               <span className="text-muted-foreground truncate">{l.detail}</span>
-            </div>
+              <ChevronRight className="h-3 w-3 text-muted-foreground ml-auto shrink-0" />
+            </button>
           ))}
         </div>
       </div>

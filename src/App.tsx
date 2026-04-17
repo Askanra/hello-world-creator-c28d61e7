@@ -1,5 +1,5 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Route, Routes } from "react-router-dom";
+import { BrowserRouter, Route, Routes, Navigate } from "react-router-dom";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -26,6 +26,8 @@ import Configuration from "./pages/dashboard/Configuration";
 import Lookup from "./pages/dashboard/Lookup";
 import Logs from "./pages/dashboard/Logs";
 import Admins from "./pages/dashboard/Admins";
+import Servers from "./pages/demo/Servers";
+import { ComingSoon } from "./pages/demo/ComingSoon";
 
 const queryClient = new QueryClient();
 
@@ -49,7 +51,23 @@ const App = () => (
           </Route>
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
-          <Route path="/dashboard" element={<DashboardLayout />}>
+
+          {/* Demo */}
+          <Route path="/demo" element={<Servers />} />
+          <Route path="/demo/redeem" element={<DashboardLayout />}>
+            <Route index element={<ComingSoon title="Redeem License" description="Activate a license key for one of your servers." />} />
+          </Route>
+          <Route path="/demo/downloads" element={<DashboardLayout />}>
+            <Route index element={<ComingSoon title="Downloads" description="Download the latest Axyrix client and server resources." />} />
+          </Route>
+          <Route path="/demo/configs" element={<DashboardLayout />}>
+            <Route index element={<ComingSoon title="Config Library" description="Browse and apply community-tuned configurations." />} />
+          </Route>
+          <Route path="/demo/models" element={<DashboardLayout />}>
+            <Route index element={<ComingSoon title="Model Browser" description="Search GTA peds, vehicles, weapons, and props by hash." />} />
+          </Route>
+
+          <Route path="/demo/:serverId" element={<DashboardLayout />}>
             <Route index element={<Overview />} />
             <Route path="players" element={<Players />} />
             <Route path="map" element={<LiveMap />} />
@@ -60,6 +78,10 @@ const App = () => (
             <Route path="logs" element={<Logs />} />
             <Route path="admins" element={<Admins />} />
           </Route>
+
+          {/* Legacy /dashboard → /demo/phoenix-rp */}
+          <Route path="/dashboard/*" element={<Navigate to="/demo/phoenix-rp" replace />} />
+
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>
