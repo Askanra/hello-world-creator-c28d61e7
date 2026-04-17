@@ -27,7 +27,10 @@ import Lookup from "./pages/dashboard/Lookup";
 import Logs from "./pages/dashboard/Logs";
 import Admins from "./pages/dashboard/Admins";
 import Servers from "./pages/demo/Servers";
-import { ComingSoon } from "./pages/demo/ComingSoon";
+import Redeem from "./pages/demo/Redeem";
+import Downloads from "./pages/demo/Downloads";
+import Configs from "./pages/demo/Configs";
+import Models from "./pages/demo/Models";
 
 const queryClient = new QueryClient();
 
@@ -55,16 +58,16 @@ const App = () => (
           {/* Demo */}
           <Route path="/demo" element={<Servers />} />
           <Route path="/demo/redeem" element={<DashboardLayout />}>
-            <Route index element={<ComingSoon title="Redeem License" description="Activate a license key for one of your servers." />} />
+            <Route index element={<Redeem />} />
           </Route>
           <Route path="/demo/downloads" element={<DashboardLayout />}>
-            <Route index element={<ComingSoon title="Downloads" description="Download the latest Axyrix client and server resources." />} />
+            <Route index element={<Downloads />} />
           </Route>
           <Route path="/demo/configs" element={<DashboardLayout />}>
-            <Route index element={<ComingSoon title="Config Library" description="Browse and apply community-tuned configurations." />} />
+            <Route index element={<Configs />} />
           </Route>
           <Route path="/demo/models" element={<DashboardLayout />}>
-            <Route index element={<ComingSoon title="Model Browser" description="Search GTA peds, vehicles, weapons, and props by hash." />} />
+            <Route index element={<Models />} />
           </Route>
 
           <Route path="/demo/:serverId" element={<DashboardLayout />}>
