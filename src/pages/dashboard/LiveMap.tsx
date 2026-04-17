@@ -1,20 +1,18 @@
 import { Map as MapIcon, Filter } from "lucide-react";
-import { PLAYERS } from "@/lib/demoData";
+import { PLAYERS, Player } from "@/lib/demoData";
 import { useState } from "react";
+import { PlayerDialog } from "@/components/dashboard/PlayerDialog";
 
 const LiveMap = () => {
   const [hovered, setHovered] = useState<number | null>(null);
-  const points = PLAYERS.slice(0, 24).map((p, i) => ({
-    ...p,
-    x: 10 + ((i * 137) % 80),
-    y: 8 + ((i * 211) % 84),
-  }));
+  const [selected, setSelected] = useState<Player | null>(null);
+  const points = PLAYERS.slice(0, 24);
 
   return (
     <div className="space-y-5 animate-fade-up">
       <div>
         <h1 className="font-display text-3xl font-bold tracking-tighter flex items-center gap-2"><MapIcon className="h-6 w-6 text-primary" /> Live Map</h1>
-        <p className="text-sm text-muted-foreground mt-1">Real-time player positions across Los Santos</p>
+        <p className="text-sm text-muted-foreground mt-1">Real-time player positions · click any pin for details</p>
       </div>
 
       <div className="grid lg:grid-cols-[280px_1fr_240px] gap-4">
@@ -53,10 +51,11 @@ const LiveMap = () => {
               key={p.id}
               onMouseEnter={() => setHovered(p.id)}
               onMouseLeave={() => setHovered(null)}
+              onClick={() => setSelected(p)}
               className="absolute -translate-x-1/2 -translate-y-1/2 group"
               style={{ left: `${p.x}%`, top: `${p.y}%` }}
             >
-              <span className={`block h-3 w-3 rounded-full ring-2 ring-background ${p.status === "threat" ? "bg-red-500" : p.status === "watch" ? "bg-amber-400" : "bg-emerald-400"} animate-pulse`} />
+              <span className={`block h-3 w-3 rounded-full ring-2 ring-background ${p.status === "threat" ? "bg-red-500" : p.status === "watch" ? "bg-amber-400" : "bg-emerald-400"} animate-pulse hover:scale-150 transition`} />
               {hovered === p.id && (
                 <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2 py-1 rounded bg-background border border-border text-xs whitespace-nowrap font-mono shadow-card z-10">{p.name}</div>
               )}
@@ -71,15 +70,17 @@ const LiveMap = () => {
           </div>
           <div className="space-y-1 max-h-[480px] overflow-y-auto">
             {points.map((p) => (
-              <div key={p.id} className="flex items-center gap-2 px-2 py-1.5 rounded hover:bg-muted/40 text-xs cursor-pointer">
+              <button key={p.id} onClick={() => setSelected(p)} className="w-full flex items-center gap-2 px-2 py-1.5 rounded hover:bg-muted/40 text-xs cursor-pointer text-left">
                 <span className="font-mono text-muted-foreground">#{p.id}</span>
                 <span className="truncate flex-1">{p.name}</span>
                 <span className={`h-1.5 w-1.5 rounded-full ${p.status === "threat" ? "bg-red-500" : p.status === "watch" ? "bg-amber-400" : "bg-emerald-400"}`} />
-              </div>
+              </button>
             ))}
           </div>
         </div>
       </div>
+
+      <PlayerDialog player={selected} onClose={() => setSelected(null)} variant="compact" />
     </div>
   );
 };
